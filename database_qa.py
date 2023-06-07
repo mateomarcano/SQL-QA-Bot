@@ -2,12 +2,26 @@ import os
 from langchain.prompts.prompt import PromptTemplate
 from langchain.sql_database import SQLDatabase
 from langchain import OpenAI, SQLDatabase, SQLDatabaseChain
-from langchain.chains import SQLDatabaseSequentialChain
 import psycopg2
 
 import traceback
 
 db = SQLDatabase.from_uri(os.environ['URL_KEY'],
+    include_tables=[
+    'api_tasks_student',
+    'api_tasks_participation',
+    'api_tasks_current_participation',
+    'api_tasks_course',
+    'api_tasks_class',
+    'api_tasks_term',
+    'api_tasks_grade_index',
+    #'api_tasks_graduation_predictions',
+    'api_tasks_instructor',
+    #'api_tasks_predicted_participation',
+    #'api_tasks_enrollment',
+    'api_tasks_persistence_table'
+
+    ],
     sample_rows_in_table_info=2)
 
 llm = OpenAI(temperature=0)
@@ -44,8 +58,7 @@ PROMPT = PromptTemplate(
     input_variables=["input", "table_info", "dialect"], template=_DEFAULT_TEMPLATE
 )
 
-#db_chain = SQLDatabaseChain(llm=llm, database=db, verbose=False, return_intermediate_steps=True, prompt=PROMPT)
-db_chain = SQLDatabaseSequentialChain(llm=llm, database=db, verbose=False, return_intermediate_steps=True, prompt=PROMPT)
+db_chain = SQLDatabaseChain(llm=llm, database=db, verbose=False, return_intermediate_steps=True, prompt=PROMPT)
 
 insert_query = "INSERT INTO api_tasks_chat_query (question, query, answer) VALUES %s"
 
